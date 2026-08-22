@@ -61,3 +61,52 @@ The complete run can take substantially longer than the smoke run because it ext
 The full run has been completed successfully with 235,795 rows, five folds, and seed 42. XGBoost is the selected champion and was saved to `../models/xgboost_phish.pkl`. The result files are in `experiments/results/`.
 
 The API selector requires the `--save-all-models` run to serve all five model choices. Without that flag, only the selected champion artifact is created and other API selections correctly return HTTP 503 rather than silently using XGBoost.
+
+## Final publication experiments
+
+### Experiment 1 — Deduplicated benchmark
+
+Drops the 425 exact duplicate URLs before any split, then reruns all five models.
+
+```powershell
+python experiments/run_experiments.py `
+  --dataset "C:\Users\91965\Downloads\PhiUSIIL_Phishing_URL_Dataset.csv" `
+  --output-dir experiments/results-dedup `
+  --deduplicate `
+  --save-all-models `
+  --seed 42
+```
+
+The count of removed rows is printed and recorded in `run_metadata.json` under `"deduplicated": true`.
+
+### Experiment 2 — External cross-dataset validation
+
+**Dataset:** Tandin Wangchuk, *Phishing URL dataset*, Mendeley Data, 2026.  
+DOI: [10.17632/3jddhy2f6s/1](https://data.mendeley.com/datasets/3jddhy2f6s/1)  
+149,726 URLs — 54,807 phishing (PhishTank) + 94,919 legitimate (Common Crawl). CC BY 4.0.
+
+**Step 1 — Prepare the external CSV** (run once after downloading the Mendeley archive):
+
+```powershell
+python experiments/prepare_external_dataset.py `
+  --phishing   "path\to\phishing_urls.csv" `
+  --legitimate "path\to\legitimate_urls.csv" `
+  --output     experiments/external_wangchuk.csv
+```
+
+**Step 2 — Run cross-dataset evaluation** (trains on full PhiUSIIL, tests on Wangchuk):
+
+```powershell
+python experiments/run_experiments.py `
+  --dataset          "C:\Users\91965\Downloads\PhiUSIIL_Phishing_URL_Dataset.csv" `
+  --output-dir       experiments/results-external `
+  --external-dataset experiments/external_wangchuk.csv `
+  --seed 42
+```
+
+Results are written to `experiments/results-external/external_results.csv`.
+
+### Experiment 3 — Mean ± Std (already computed)
+
+The `_std` columns are already present in every `cross_validation_results.csv`.
+No additional run is needed. Report directly from the existing results file.

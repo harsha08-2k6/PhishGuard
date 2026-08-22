@@ -1,0 +1,32 @@
+{
+  "dataset": "C:\\Users\\91965\\Downloads\\PhiUSIIL_Phishing_URL_Dataset.csv",
+  "deduplicated": false,
+  "rows_used": 235795,
+  "columns_used": [
+    "URL",
+    "Domain",
+    "label"
+  ],
+  "feature_names": [
+    "url_length",
+    "domain_length",
+    "num_dots",
+    "num_subdomains",
+    "num_digits",
+    "special_chars",
+    "num_hyphens",
+    "num_slashes",
+    "has_ip",
+    "is_https",
+    "suspicious_keywords",
+    "url_entropy"
+  ],
+  "seed": 42,
+  "cv_folds": 5,
+  "champion_saved_to": "L:\\Research paper\\website-react\\backend\\models\\xgboost_phish.pkl",
+  "artifact_paths": {
+    "XGBoost": "L:\\Research paper\\website-react\\backend\\models\\xgboost_phish.pkl"
+  },
+  "champion_model": "XGBoost",
+  "xgboost_skipped": false
+}

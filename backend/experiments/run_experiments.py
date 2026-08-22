@@ -262,9 +262,15 @@ def main() -> None:
     parser.add_argument("--external-dataset", type=Path)
     parser.add_argument("--save-all-models", action="store_true")
     parser.add_argument("--artifacts-only", action="store_true")
+    parser.add_argument("--deduplicate", action="store_true",
+                        help="Drop exact duplicate URLs before any split (Experiment 1).")
     args = parser.parse_args()
 
     data = load_dataset(args.dataset, args.sample_size, args.seed)
+    if args.deduplicate:
+        before = len(data)
+        data = data.drop_duplicates(subset=["URL"]).reset_index(drop=True)
+        print(f"Deduplication: {before:,} -> {len(data):,} rows ({before - len(data):,} removed)")
     models = make_models(args.seed, args.skip_xgboost)
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -324,6 +330,7 @@ def main() -> None:
 
     metadata = {
         "dataset": str(args.dataset),
+        "deduplicated": args.deduplicate,
         "rows_used": len(data),
         "columns_used": ["URL", "Domain", "label"],
         "feature_names": FEATURE_NAMES,
