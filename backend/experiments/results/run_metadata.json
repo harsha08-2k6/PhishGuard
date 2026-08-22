@@ -23,6 +23,13 @@
   "seed": 42,
   "cv_folds": 5,
   "champion_saved_to": "L:\\Research paper\\website-react\\backend\\models\\xgboost_phish.pkl",
+  "artifact_paths": {
+    "Logistic Regression": "L:\\Research paper\\website-react\\backend\\models\\logistic_regression_phish.pkl",
+    "Decision Tree": "L:\\Research paper\\website-react\\backend\\models\\decision_tree_phish.pkl",
+    "Random Forest": "L:\\Research paper\\website-react\\backend\\models\\random_forest_phish.pkl",
+    "SVM (RBF approximation)": "L:\\Research paper\\website-react\\backend\\models\\svm_rbf_approximation.pkl",
+    "XGBoost": "L:\\Research paper\\website-react\\backend\\models\\xgboost_phish.pkl"
+  },
   "champion_model": "XGBoost",
   "xgboost_skipped": false
 }

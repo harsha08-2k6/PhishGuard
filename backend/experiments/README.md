@@ -43,9 +43,9 @@ python experiments/run_experiments.py `
 
 ## Outputs
 
-- `cross_validation_results.csv`: mean accuracy, precision, recall, F1, ROC-AUC, and PR-AUC
+- `cross_validation_results.csv`: mean and sample standard deviation for accuracy, precision, recall, F1, ROC-AUC, and PR-AUC
 - `domain_disjoint_results.csv`: the same metrics on an unseen-domain holdout
-- `ablation_results.json`: champion results for structure, security, randomness, and all 12 features
+- `ablation_results.json`: champion results for structure, security, randomness, and all 12 features, including fold standard deviations
 - `cumulative_ablation_results.json`: progressive lexical-to-all-feature ablation results
 - `run_metadata.json`: feature order, seed, rows used, and artifact location
 - `../models/*.pkl`: full-data model artifacts when `--save-all-models` is enabled

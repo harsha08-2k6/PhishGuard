@@ -91,6 +91,15 @@ def metric_row(y_true: np.ndarray, y_pred: np.ndarray, probabilities: np.ndarray
     }
 
 
+def aggregate_metrics(rows: list[dict[str, float]]) -> dict[str, float]:
+    summary = {}
+    for key in rows[0]:
+        values = [row[key] for row in rows]
+        summary[key] = float(np.mean(values))
+        summary[f"{key}_std"] = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
+    return summary
+
+
 def make_models(seed: int, skip_xgboost: bool) -> dict[str, Any]:
     models: dict[str, Any] = {
         "Logistic Regression": Pipeline([
@@ -181,7 +190,7 @@ def evaluate_cv(
         probabilities = score_model(fitted, features.iloc[test_index])
         predictions = (probabilities >= 0.5).astype(int)
         fold_metrics.append(metric_row(target[test_index], predictions, probabilities))
-    return {key: float(np.mean([row[key] for row in fold_metrics])) for key in fold_metrics[0]}
+    return aggregate_metrics(fold_metrics)
 
 
 def evaluate_domain_holdout(
@@ -220,7 +229,7 @@ def run_ablation(
         rows.append({
             "feature_set": group_name,
             "features": feature_names,
-            **{key: float(np.mean([row[key] for row in fold_metrics])) for key in fold_metrics[0]},
+            **aggregate_metrics(fold_metrics),
         })
     return rows
 
