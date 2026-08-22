@@ -1,0 +1,28 @@
+{
+  "dataset": "C:\\Users\\91965\\Downloads\\PhiUSIIL_Phishing_URL_Dataset.csv",
+  "rows_used": 4000,
+  "columns_used": [
+    "URL",
+    "Domain",
+    "label"
+  ],
+  "feature_names": [
+    "url_length",
+    "domain_length",
+    "num_dots",
+    "num_subdomains",
+    "num_digits",
+    "special_chars",
+    "num_hyphens",
+    "num_slashes",
+    "has_ip",
+    "is_https",
+    "suspicious_keywords",
+    "url_entropy"
+  ],
+  "seed": 42,
+  "cv_folds": 3,
+  "champion_saved_to": "L:\\Research paper\\website-react\\backend\\models\\random_forest_phish.pkl",
+  "champion_model": "Random Forest",
+  "xgboost_skipped": true
+}
