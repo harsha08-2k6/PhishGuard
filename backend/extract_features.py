@@ -14,6 +14,20 @@ SUSPICIOUS_WORDS = [
     "free",
 ]
 IP_PATTERN = r"(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])"
+FEATURE_ORDER = [
+    "url_length",
+    "domain_length",
+    "num_dots",
+    "num_subdomains",
+    "num_digits",
+    "special_chars",
+    "num_hyphens",
+    "num_slashes",
+    "has_ip",
+    "is_https",
+    "suspicious_keywords",
+    "url_entropy",
+]
 
 
 def calculate_entropy(text: str) -> float:
@@ -24,6 +38,7 @@ def calculate_entropy(text: str) -> float:
 
 
 def extract_features(url: str) -> dict:
+    """Return the 12 URL-only features in FEATURE_ORDER insertion order."""
     normalized_url = url if "://" in url else f"http://{url}"
     parsed = urlparse(normalized_url)
     domain = parsed.netloc
@@ -40,12 +55,14 @@ def extract_features(url: str) -> dict:
         "num_slashes": url.count("/"),
         "has_ip": int(bool(re.search(IP_PATTERN, domain))),
         "is_https": int(parsed.scheme == "https"),
+        # Count distinct predefined keywords, not repeated occurrences.
         "suspicious_keywords": sum(word in lower_url for word in SUSPICIOUS_WORDS),
         "url_entropy": round(calculate_entropy(url), 3),
     }
 
 
 def explain_prediction(features: dict) -> list[str]:
+    """Return rule-based risk indicators, not model feature attributions."""
     reasons = []
     if features["has_ip"]:
         reasons.append("Host is an unresolved raw IP address.")

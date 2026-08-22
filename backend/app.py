@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from extract_features import explain_prediction, extract_features
+from extract_features import FEATURE_ORDER, explain_prediction, extract_features
 
 
 MODEL_PATHS = {
@@ -52,15 +52,15 @@ def model_score(features: dict, model_name: str) -> tuple[float, str]:
             import joblib
 
             model = joblib.load(model_path)
-            values = [[features[key] for key in features]]
+            values = [[features[key] for key in FEATURE_ORDER]]
             if hasattr(model, "predict_proba"):
                 probability = float(model.predict_proba(values)[0][1])
             else:
                 decision_value = float(model.decision_function(values)[0])
                 probability = 1.0 / (1.0 + math.exp(-max(-40.0, min(40.0, decision_value))))
             return probability, "trained-model"
-        except (ImportError, OSError, ValueError, AttributeError, IndexError):
-            pass
+        except (ImportError, OSError, ValueError, AttributeError, IndexError) as error:
+            raise RuntimeError(f"Could not load or run {model_name} model artifact.") from error
 
     if model_name != "XGBoost":
         raise FileNotFoundError(
@@ -85,7 +85,7 @@ def scan(request: ScanRequest) -> dict:
     features = extract_features(request.url)
     try:
         probability, inference_mode = model_score(features, request.model)
-    except FileNotFoundError as error:
+    except (FileNotFoundError, RuntimeError) as error:
         from fastapi import HTTPException
 
         raise HTTPException(status_code=503, detail=str(error)) from error

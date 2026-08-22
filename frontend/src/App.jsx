@@ -128,9 +128,9 @@ const featureGroups = [
     body: "Character randomness that can reveal generated domains, encoded tokens, and obfuscation."
   },
   {
-    title: "Explainability",
+    title: "Rule-based indicators",
     icon: ShieldCheck,
-    body: "Human-readable warning badges that explain why the system raised a risk flag."
+    body: "Human-readable risk indicators show which URL properties triggered a warning."
   }
 ];
 
@@ -699,12 +699,12 @@ function App() {
             <li>
               <BrainCircuit aria-hidden="true" size={23} />
               <strong>Predict</strong>
-              <span>Supervised classifiers output a phishing probability and threshold-based verdict.</span>
+              <span>Supervised classifiers output a phishing probability; the browser fallback is only a demo heuristic.</span>
             </li>
             <li>
               <ShieldCheck aria-hidden="true" size={23} />
-              <strong>Explain</strong>
-              <span>Risk triggers are shown as readable diagnostic badges for users and analysts.</span>
+              <strong>Flag</strong>
+              <span>Rule-based risk indicators show which URL properties triggered warnings.</span>
             </li>
           </ol>
         </section>
@@ -778,7 +778,7 @@ function App() {
 
       <footer>
         <span>PhishGuard XAI React Prototype</span>
-        <span>URL-only detection | Explainable ML | Publication website</span>
+        <span>URL-only detection | Rule-based risk indicators | Publication website</span>
       </footer>
     </>
   );

@@ -37,23 +37,10 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from extract_features import extract_features  # noqa: E402
+from extract_features import FEATURE_ORDER, extract_features  # noqa: E402
 
 
-FEATURE_NAMES = [
-    "url_length",
-    "domain_length",
-    "num_dots",
-    "num_subdomains",
-    "num_digits",
-    "special_chars",
-    "num_hyphens",
-    "num_slashes",
-    "has_ip",
-    "is_https",
-    "suspicious_keywords",
-    "url_entropy",
-]
+FEATURE_NAMES = FEATURE_ORDER
 
 ABLATION_GROUPS = {
     "all_12": FEATURE_NAMES,
