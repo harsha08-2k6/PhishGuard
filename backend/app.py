@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 from typing import Literal
 
@@ -8,7 +9,13 @@ from pydantic import BaseModel, Field
 from extract_features import explain_prediction, extract_features
 
 
-MODEL_PATH = Path(__file__).parent / "models" / "xgboost_phish.pkl"
+MODEL_PATHS = {
+    "XGBoost": Path(__file__).parent / "models" / "xgboost_phish.pkl",
+    "Random Forest": Path(__file__).parent / "models" / "random_forest_phish.pkl",
+    "SVM (RBF approximation)": Path(__file__).parent / "models" / "svm_rbf_approximation.pkl",
+    "Decision Tree": Path(__file__).parent / "models" / "decision_tree_phish.pkl",
+    "Logistic Regression": Path(__file__).parent / "models" / "logistic_regression_phish.pkl",
+}
 app = FastAPI(title="PhishGuard Research API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
@@ -21,7 +28,7 @@ app.add_middleware(
 class ScanRequest(BaseModel):
     url: str = Field(min_length=3, max_length=4096)
     model: Literal[
-        "XGBoost", "Random Forest", "SVM", "Decision Tree", "Logistic Regression"
+        "XGBoost", "Random Forest", "SVM (RBF approximation)", "Decision Tree", "Logistic Regression"
     ] = "XGBoost"
 
 
@@ -39,37 +46,49 @@ def heuristic_score(features: dict) -> float:
 
 
 def model_score(features: dict, model_name: str) -> tuple[float, str]:
-    if MODEL_PATH.exists():
+    model_path = MODEL_PATHS[model_name]
+    if model_path.exists():
         try:
             import joblib
 
-            model = joblib.load(MODEL_PATH)
+            model = joblib.load(model_path)
             values = [[features[key] for key in features]]
-            probability = float(model.predict_proba(values)[0][1])
+            if hasattr(model, "predict_proba"):
+                probability = float(model.predict_proba(values)[0][1])
+            else:
+                decision_value = float(model.decision_function(values)[0])
+                probability = 1.0 / (1.0 + math.exp(-max(-40.0, min(40.0, decision_value))))
             return probability, "trained-model"
         except (ImportError, OSError, ValueError, AttributeError, IndexError):
             pass
 
-    profile = {
-        "XGBoost": (1.0, 0.0),
-        "Random Forest": (0.96, 0.02),
-        "SVM": (0.92, 0.04),
-        "Decision Tree": (1.05, -0.01),
-        "Logistic Regression": (0.88, 0.05),
-    }[model_name]
+    if model_name != "XGBoost":
+        raise FileNotFoundError(
+            f"No trained artifact is available for {model_name}. "
+            "Run the experiment runner with --save-all-models first."
+        )
+
     base = heuristic_score(features)
-    return min(0.99, max(0.01, base * profile[0] + profile[1])), "heuristic-proxy"
+    return min(0.99, max(0.01, base)), "demo-heuristic"
 
 
 @app.get("/health")
 def health() -> dict:
-    return {"status": "ok", "model_loaded": MODEL_PATH.exists()}
+    return {
+        "status": "ok",
+        "available_models": [name for name, path in MODEL_PATHS.items() if path.exists()],
+    }
 
 
 @app.post("/api/scan")
 def scan(request: ScanRequest) -> dict:
     features = extract_features(request.url)
-    probability, inference_mode = model_score(features, request.model)
+    try:
+        probability, inference_mode = model_score(features, request.model)
+    except FileNotFoundError as error:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=503, detail=str(error)) from error
     return {
         "url": request.url,
         "model": request.model,

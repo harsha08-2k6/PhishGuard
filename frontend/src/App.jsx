@@ -56,7 +56,7 @@ const modelCards = [
     tag: "Champion candidate",
     role: "Primary high-performance model",
     icon: BrainCircuit,
-    params: "n_estimators=200, max_depth=6, learning_rate=0.1",
+    params: "n_estimators=150, max_depth=6, learning_rate=0.1",
     body: "Tree boosting captures non-linear interactions between entropy, URL length, subdomains, symbols, and keyword density."
   },
   {
@@ -64,23 +64,23 @@ const modelCards = [
     tag: "Ensemble baseline",
     role: "Robust tree ensemble",
     icon: GitBranch,
-    params: "n_estimators=100, criterion=gini",
+    params: "n_estimators=150, class_weight=balanced",
     body: "Bagged decision trees provide robust classification and readable feature-importance rankings."
   },
   {
-    name: "SVM",
-    tag: "Margin model",
-    role: "Scaled-feature classifier",
+    name: "SVM (RBF approximation)",
+    tag: "Scalable margin model",
+    role: "Nystroem RBF map + LinearSVC",
     icon: Activity,
-    params: "C=1.0, kernel=rbf, gamma=scale",
-    body: "An RBF kernel separates scaled URL feature vectors across a non-linear decision boundary."
+    params: "n_components=50, gamma=1.0, C=1.0",
+    body: "A Nystroem RBF feature map with LinearSVC approximates a non-linear decision boundary at full-dataset scale."
   },
   {
     name: "Decision Tree",
     tag: "Interpretable baseline",
     role: "Readable decision paths",
     icon: GitBranch,
-    params: "max_depth=8, criterion=entropy",
+    params: "max_depth=8, class_weight=balanced",
     body: "A lightweight baseline that produces transparent feature-split logic for academic comparison."
   },
   {
@@ -88,7 +88,7 @@ const modelCards = [
     tag: "Linear baseline",
     role: "Statistical reference model",
     icon: BarChart3,
-    params: "penalty=l2, solver=lbfgs",
+    params: "penalty=l2, solver=lbfgs, class_weight=balanced",
     body: "A transparent statistical baseline for comparing the value of more expressive classifiers."
   }
 ];
@@ -96,9 +96,17 @@ const modelCards = [
 const modelProfiles = {
   XGBoost: { multiplier: 1.0, bias: 0 },
   "Random Forest": { multiplier: 0.96, bias: 2 },
-  SVM: { multiplier: 0.92, bias: 4 },
+  "SVM (RBF approximation)": { multiplier: 0.92, bias: 4 },
   "Decision Tree": { multiplier: 1.05, bias: -1 },
   "Logistic Regression": { multiplier: 0.88, bias: 5 }
+};
+
+const benchmarkResults = {
+  "Logistic Regression": ["99.33%", "98.90%", "99.94%", "99.42%", "99.61%"],
+  "Decision Tree": ["99.51%", "99.23%", "99.92%", "99.57%", "99.68%"],
+  "Random Forest": ["99.49%", "99.33%", "99.79%", "99.56%", "99.65%"],
+  "SVM (RBF approximation)": ["97.84%", "99.19%", "97.01%", "98.09%", "99.55%"],
+  XGBoost: ["99.56%", "99.32%", "99.93%", "99.62%", "99.79%"]
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? "";
@@ -347,9 +355,9 @@ function UrlAnalyzer() {
       <div className="section-heading">
         <p className="eyebrow">Interactive Prototype</p>
         <h2 id="demo-title">Analyze a URL in Real Time</h2>
-        <p>
-          This frontend demo computes lexical URL features directly in React and maps risky signals to visible explanation badges.
-        </p>
+              <p>
+                The scanner sends URL-only features to FastAPI when configured. Without the API, results are clearly labeled as a demo heuristic.
+              </p>
       </div>
 
       <div className="demo-grid">
@@ -453,7 +461,7 @@ function UrlAnalyzer() {
             ))}
           </div>
           <span className="inference-status">
-            {API_BASE_URL && remoteResult ? "FastAPI inference" : "Browser lexical preview"}
+            {API_BASE_URL && remoteResult ? "FastAPI trained-model inference" : "Demo heuristic - browser fallback"}
           </span>
         </aside>
       </div>
@@ -616,14 +624,15 @@ function App() {
               </thead>
               <tbody>
                 {modelCards.map((model) => (
+                  (() => {
+                    const metrics = benchmarkResults[model.name];
+                    return (
                   <tr key={model.name}>
                     <td>{model.name}</td>
-                    <td>TBD</td>
-                    <td>TBD</td>
-                    <td>TBD</td>
-                    <td>TBD</td>
-                    <td>TBD</td>
+                    {metrics.map((metric) => <td key={metric}>{metric}</td>)}
                   </tr>
+                    );
+                  })()
                 ))}
               </tbody>
             </table>

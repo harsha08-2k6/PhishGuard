@@ -13,6 +13,7 @@ import json
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import joblib
 import numpy as np
@@ -66,6 +67,29 @@ ABLATION_GROUPS = {
     ],
     "security": ["has_ip", "is_https", "suspicious_keywords"],
     "randomness": ["num_digits", "special_chars", "url_entropy"],
+}
+
+CUMULATIVE_ABLATION_GROUPS = {
+    "lexical": ["url_length", "num_digits", "special_chars"],
+    "lexical_structural": [
+        "url_length", "num_digits", "special_chars",
+        "num_dots", "num_subdomains", "num_hyphens", "num_slashes",
+    ],
+    "plus_domain": [
+        "url_length", "num_digits", "special_chars",
+        "num_dots", "num_subdomains", "num_hyphens", "num_slashes",
+        "domain_length",
+    ],
+    "plus_security": [
+        "url_length", "num_digits", "special_chars",
+        "num_dots", "num_subdomains", "num_hyphens", "num_slashes",
+        "has_ip", "is_https", "suspicious_keywords",
+    ],
+    "plus_entropy": [
+        "url_length", "num_digits", "special_chars",
+        "num_dots", "num_subdomains", "num_hyphens", "num_slashes",
+        "has_ip", "is_https", "suspicious_keywords", "url_entropy",
+    ],
 }
 
 
@@ -130,9 +154,17 @@ def score_model(model: Any, features: pd.DataFrame) -> np.ndarray:
 
 
 def load_dataset(path: Path, sample_size: int | None, seed: int) -> pd.DataFrame:
-    columns = ["URL", "Domain", "label"]
+    available_columns = pd.read_csv(path, nrows=0).columns.tolist()
+    required_columns = ["URL", "label"]
+    if not set(required_columns).issubset(available_columns):
+        raise ValueError("Dataset must contain URL and label columns for evaluation.")
+    columns = required_columns + (["Domain"] if "Domain" in available_columns else [])
     frame = pd.read_csv(path, usecols=columns, low_memory=False)
     frame["URL"] = frame["URL"].astype(str)
+    if "Domain" not in frame:
+        frame["Domain"] = frame["URL"].map(
+            lambda url: urlparse(url if "://" in url else f"http://{url}").netloc
+        )
     frame["Domain"] = frame["Domain"].astype(str)
     frame = frame.dropna(subset=["URL", "Domain", "label"])
     if sample_size and sample_size < len(frame):
@@ -181,11 +213,17 @@ def evaluate_domain_holdout(
     return metric_row(target[test_index], predictions, probabilities)
 
 
-def run_ablation(model: Any, data: pd.DataFrame, folds: int, seed: int) -> list[dict[str, Any]]:
+def run_ablation(
+    model: Any,
+    data: pd.DataFrame,
+    folds: int,
+    seed: int,
+    groups: dict[str, list[str]],
+) -> list[dict[str, Any]]:
     rows = []
     target = data["label"].to_numpy()
     splitter = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
-    for group_name, feature_names in ABLATION_GROUPS.items():
+    for group_name, feature_names in groups.items():
         fold_metrics = []
         for train_index, test_index in splitter.split(data[feature_names], target):
             fitted = clone(model).fit(data.loc[train_index, feature_names], target[train_index])
@@ -200,6 +238,23 @@ def run_ablation(model: Any, data: pd.DataFrame, folds: int, seed: int) -> list[
     return rows
 
 
+def evaluate_external(
+    models: dict[str, Any],
+    training_data: pd.DataFrame,
+    external_path: Path,
+    seed: int,
+) -> list[dict[str, float | str]]:
+    external = load_dataset(external_path, None, seed)
+    target = external["label"].to_numpy()
+    rows = []
+    for model_name, model in models.items():
+        fitted = clone(model).fit(training_data[FEATURE_NAMES], training_data["label"])
+        probabilities = score_model(fitted, external[FEATURE_NAMES])
+        predictions = (probabilities >= 0.5).astype(int)
+        rows.append({"model": model_name, **metric_row(target, predictions, probabilities)})
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, required=True)
@@ -208,11 +263,31 @@ def main() -> None:
     parser.add_argument("--cv-folds", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--skip-xgboost", action="store_true")
+    parser.add_argument("--external-dataset", type=Path)
+    parser.add_argument("--save-all-models", action="store_true")
+    parser.add_argument("--artifacts-only", action="store_true")
     args = parser.parse_args()
 
     data = load_dataset(args.dataset, args.sample_size, args.seed)
     models = make_models(args.seed, args.skip_xgboost)
     args.output_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.artifacts_only:
+        model_directory = Path(__file__).resolve().parents[1] / "models"
+        model_directory.mkdir(parents=True, exist_ok=True)
+        artifact_names = {
+            "XGBoost": "xgboost_phish.pkl",
+            "Random Forest": "random_forest_phish.pkl",
+            "SVM (RBF approximation)": "svm_rbf_approximation.pkl",
+            "Decision Tree": "decision_tree_phish.pkl",
+            "Logistic Regression": "logistic_regression_phish.pkl",
+        }
+        for model_name, model in models.items():
+            print(f"Training artifact {model_name}...")
+            fitted_model = clone(model).fit(data[FEATURE_NAMES], data["label"])
+            joblib.dump(fitted_model, model_directory / artifact_names[model_name])
+        print(f"Saved {len(models)} model artifacts to {model_directory}")
+        return
 
     cv_rows = []
     domain_rows = []
@@ -223,14 +298,33 @@ def main() -> None:
 
     champion_name = "XGBoost" if "XGBoost" in models else "Random Forest"
     champion = models[champion_name]
-    ablation_rows = run_ablation(champion, data, args.cv_folds, args.seed)
+    ablation_rows = run_ablation(champion, data, args.cv_folds, args.seed, ABLATION_GROUPS)
+    cumulative_ablation_rows = run_ablation(
+        champion, data, args.cv_folds, args.seed, CUMULATIVE_ABLATION_GROUPS
+    )
 
-    # Train the champion on all available rows for the FastAPI endpoint.
-    champion.fit(data[FEATURE_NAMES], data["label"])
-    artifact_name = "xgboost_phish.pkl" if champion_name == "XGBoost" else "random_forest_phish.pkl"
-    model_path = Path(__file__).resolve().parents[1] / "models" / artifact_name
-    model_path.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(champion, model_path)
+    model_directory = Path(__file__).resolve().parents[1] / "models"
+    model_directory.mkdir(parents=True, exist_ok=True)
+    artifact_paths = {}
+    if args.save_all_models:
+        for model_name, model in models.items():
+            fitted_model = clone(model).fit(data[FEATURE_NAMES], data["label"])
+            artifact_name = {
+                "XGBoost": "xgboost_phish.pkl",
+                "Random Forest": "random_forest_phish.pkl",
+                "SVM (RBF approximation)": "svm_rbf_approximation.pkl",
+                "Decision Tree": "decision_tree_phish.pkl",
+                "Logistic Regression": "logistic_regression_phish.pkl",
+            }[model_name]
+            artifact_path = model_directory / artifact_name
+            joblib.dump(fitted_model, artifact_path)
+            artifact_paths[model_name] = str(artifact_path)
+    else:
+        champion.fit(data[FEATURE_NAMES], data["label"])
+        artifact_name = "xgboost_phish.pkl" if champion_name == "XGBoost" else "random_forest_phish.pkl"
+        artifact_path = model_directory / artifact_name
+        joblib.dump(champion, artifact_path)
+        artifact_paths[champion_name] = str(artifact_path)
 
     metadata = {
         "dataset": str(args.dataset),
@@ -239,7 +333,8 @@ def main() -> None:
         "feature_names": FEATURE_NAMES,
         "seed": args.seed,
         "cv_folds": args.cv_folds,
-        "champion_saved_to": str(model_path),
+        "champion_saved_to": artifact_paths[champion_name],
+        "artifact_paths": artifact_paths,
         "champion_model": champion_name,
         "xgboost_skipped": args.skip_xgboost,
     }
@@ -247,7 +342,14 @@ def main() -> None:
     pd.DataFrame(cv_rows).to_csv(args.output_dir / "cross_validation_results.csv", index=False)
     pd.DataFrame(domain_rows).to_csv(args.output_dir / "domain_disjoint_results.csv", index=False)
     pd.DataFrame(ablation_rows).to_json(args.output_dir / "ablation_results.json", orient="records", indent=2)
-    print(f"Completed {len(data):,} rows; champion: {champion_name}; artifact: {model_path}")
+    pd.DataFrame(cumulative_ablation_rows).to_json(
+        args.output_dir / "cumulative_ablation_results.json", orient="records", indent=2
+    )
+    if args.external_dataset:
+        pd.DataFrame(evaluate_external(models, data, args.external_dataset, args.seed)).to_csv(
+            args.output_dir / "external_results.csv", index=False
+        )
+    print(f"Completed {len(data):,} rows; champion: {champion_name}; artifacts: {len(artifact_paths)}")
 
 
 if __name__ == "__main__":
