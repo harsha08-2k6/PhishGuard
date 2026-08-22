@@ -1,0 +1,212 @@
+{
+  "dataset": "C:\\Users\\91965\\Downloads\\PhiUSIIL_Phishing_URL_Dataset.csv",
+  "rows": 235795,
+  "source_columns": [
+    "FILENAME",
+    "URL",
+    "URLLength",
+    "Domain",
+    "DomainLength",
+    "IsDomainIP",
+    "TLD",
+    "URLSimilarityIndex",
+    "CharContinuationRate",
+    "TLDLegitimateProb",
+    "URLCharProb",
+    "TLDLength",
+    "NoOfSubDomain",
+    "HasObfuscation",
+    "NoOfObfuscatedChar",
+    "ObfuscationRatio",
+    "NoOfLettersInURL",
+    "LetterRatioInURL",
+    "NoOfDegitsInURL",
+    "DegitRatioInURL",
+    "NoOfEqualsInURL",
+    "NoOfQMarkInURL",
+    "NoOfAmpersandInURL",
+    "NoOfOtherSpecialCharsInURL",
+    "SpacialCharRatioInURL",
+    "IsHTTPS",
+    "LineOfCode",
+    "LargestLineLength",
+    "HasTitle",
+    "Title",
+    "DomainTitleMatchScore",
+    "URLTitleMatchScore",
+    "HasFavicon",
+    "Robots",
+    "IsResponsive",
+    "NoOfURLRedirect",
+    "NoOfSelfRedirect",
+    "HasDescription",
+    "NoOfPopup",
+    "NoOfiFrame",
+    "HasExternalFormSubmit",
+    "HasSocialNet",
+    "HasSubmitButton",
+    "HasHiddenFields",
+    "HasPasswordField",
+    "Bank",
+    "Pay",
+    "Crypto",
+    "HasCopyrightInfo",
+    "NoOfImage",
+    "NoOfCSS",
+    "NoOfJS",
+    "NoOfSelfRef",
+    "NoOfEmptyRef",
+    "NoOfExternalRef",
+    "label"
+  ],
+  "model_features": [
+    "url_length",
+    "domain_length",
+    "num_dots",
+    "num_subdomains",
+    "num_digits",
+    "special_chars",
+    "num_hyphens",
+    "num_slashes",
+    "has_ip",
+    "is_https",
+    "suspicious_keywords",
+    "url_entropy"
+  ],
+  "excluded_identifier_columns": [
+    "FILENAME"
+  ],
+  "excluded_page_content_columns": [
+    "LineOfCode",
+    "LargestLineLength",
+    "HasTitle",
+    "Title",
+    "HasPasswordField",
+    "NoOfExternalRef"
+  ],
+  "label_distribution": {
+    "0": 100945,
+    "1": 134850
+  },
+  "row_quality": {
+    "missing_cells_in_used_columns": 0,
+    "exact_duplicate_rows_in_used_columns": 425,
+    "blank_urls": 0
+  },
+  "group_overlap": {
+    "normalized_url": {
+      "groups": 235370,
+      "mixed_label_groups": 0,
+      "mixed_group_rate": 0.0
+    },
+    "dataset_domain": {
+      "groups": 220086,
+      "mixed_label_groups": 54,
+      "mixed_group_rate": 0.0002453586325345547
+    },
+    "derived_domain": {
+      "groups": 220086,
+      "mixed_label_groups": 54,
+      "mixed_group_rate": 0.0002453586325345547
+    },
+    "repeated_url_groups": 425,
+    "mixed_label_url_groups": 0,
+    "repeated_domain_groups": 5526
+  },
+  "feature_label_correlations": {
+    "is_https": 0.6128735215842913,
+    "num_slashes": -0.48220555232895124,
+    "url_entropy": -0.39704946692963744,
+    "domain_length": -0.2831518897971002,
+    "url_length": -0.22822943682606933,
+    "num_hyphens": -0.20282541655965441,
+    "num_digits": -0.17838612664106007,
+    "suspicious_keywords": -0.16759203426681046,
+    "special_chars": -0.14925069296188018,
+    "num_dots": -0.11960632768667043,
+    "has_ip": -0.060249780101391086,
+    "num_subdomains": -0.005955129316836138
+  },
+  "feature_value_purity": {
+    "url_length": {
+      "unique_values": 481,
+      "weighted_label_purity": 0.7432006615916368,
+      "max_value_group_size": 15880
+    },
+    "domain_length": {
+      "unique_values": 101,
+      "weighted_label_purity": 0.6818380372781442,
+      "max_value_group_size": 16625
+    },
+    "num_dots": {
+      "unique_values": 27,
+      "weighted_label_purity": 0.6562013613520219,
+      "max_value_group_size": 175938
+    },
+    "num_subdomains": {
+      "unique_values": 10,
+      "weighted_label_purity": 0.6462562819398207,
+      "max_value_group_size": 178406
+    },
+    "num_digits": {
+      "unique_values": 183,
+      "weighted_label_purity": 0.7603808392883649,
+      "max_value_group_size": 184231
+    },
+    "special_chars": {
+      "unique_values": 71,
+      "weighted_label_purity": 0.7007612544795268,
+      "max_value_group_size": 185281
+    },
+    "num_hyphens": {
+      "unique_values": 36,
+      "weighted_label_purity": 0.6843444517483407,
+      "max_value_group_size": 189152
+    },
+    "num_slashes": {
+      "unique_values": 29,
+      "weighted_label_purity": 0.8281685362285036,
+      "max_value_group_size": 175367
+    },
+    "has_ip": {
+      "unique_values": 2,
+      "weighted_label_purity": 0.5746050594796327,
+      "max_value_group_size": 235156
+    },
+    "is_https": {
+      "unique_values": 2,
+      "weighted_label_purity": 0.7913611399732818,
+      "max_value_group_size": 184046
+    },
+    "suspicious_keywords": {
+      "unique_values": 5,
+      "weighted_label_purity": 0.5971288619351556,
+      "max_value_group_size": 228355
+    },
+    "url_entropy": {
+      "unique_values": 2095,
+      "weighted_label_purity": 0.736792552853114,
+      "max_value_group_size": 2063
+    }
+  },
+  "special_checks": {
+    "https_label_table": {
+      "0": {
+        "(0, 0)": 51749
+      },
+      "1": {
+        "(1, 1)": 134850,
+        "(1, 0)": 49196
+      }
+    },
+    "ip_label_table": {
+      "0": {
+        "(0, 1)": 134850,
+        "(0, 0)": 100306
+      },
+      "1": {
+        "(1, 0)": 639
+      }
+    }
+  }
+}
