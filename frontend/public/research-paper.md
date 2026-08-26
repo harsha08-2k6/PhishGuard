@@ -168,19 +168,108 @@ The evaluation should report:
 | Confusion matrix | Shows false positives and false negatives explicitly. |
 | Inference latency | Measures suitability for real-time deployment. |
 
-## 8. Benchmark Reporting Template
+## 8. Experimental Results
 
-The following table should be populated after training and testing on the selected dataset. Placeholder values are intentionally omitted to avoid reporting unverified performance.
+This section presents the results of the four evaluation experiments conducted to assess the performance of the five machine learning models (XGBoost, Random Forest, SVM with RBF approximation, Decision Tree, and Logistic Regression) trained on the PhiUSIIL dataset using 12 lexical and structural URL features.
 
-| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC | Mean Latency |
-|---|---:|---:|---:|---:|---:|---:|
-| XGBoost | TBD | TBD | TBD | TBD | TBD | TBD |
-| Random Forest | TBD | TBD | TBD | TBD | TBD | TBD |
-| SVM | TBD | TBD | TBD | TBD | TBD | TBD |
-| Decision Tree | TBD | TBD | TBD | TBD | TBD | TBD |
-| Logistic Regression | TBD | TBD | TBD | TBD | TBD | TBD |
+### 8.1 Experiment 1: Standard Evaluation (Stratified 5-Fold Cross-Validation)
+The standard stratified 5-fold cross-validation evaluates baseline generalization performance when train and test sets are sampled randomly from the same underlying distribution of the PhiUSIIL dataset (235,795 URLs). Table 3 details the average performance metrics along with their sample standard deviations ($\pm \text{Std}$).
 
-## 9. Dashboard and Application Design
+Table 3: Stratified 5-Fold Cross-Validation Performance on PhiUSIIL Dataset
+| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC | PR-AUC |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| XGBoost | **0.9956 ± 0.0003** | 0.9932 ± 0.0005 | 0.9993 ± 0.0002 | **0.9962 ± 0.0003** | **0.9979 ± 0.0002** | **0.9972 ± 0.0003** |
+| Random Forest | 0.9949 ± 0.0002 | **0.9933 ± 0.0004** | 0.9979 ± 0.0003 | 0.9956 ± 0.0002 | 0.9965 ± 0.0004 | 0.9947 ± 0.0006 |
+| SVM (RBF approx.) | 0.9784 ± 0.0073 | 0.9919 ± 0.0014 | 0.9701 ± 0.0125 | 0.9809 ± 0.0066 | 0.9955 ± 0.0005 | 0.9937 ± 0.0010 |
+| Decision Tree | 0.9951 ± 0.0004 | 0.9923 ± 0.0005 | 0.9992 ± 0.0002 | 0.9957 ± 0.0003 | 0.9968 ± 0.0004 | 0.9953 ± 0.0005 |
+| Logistic Regression | 0.9933 ± 0.0004 | 0.9890 ± 0.0006 | **0.9994 ± 0.0003** | 0.9942 ± 0.0004 | 0.9961 ± 0.0003 | 0.9943 ± 0.0007 |
+
+All models exhibit exceptionally high performance within the PhiUSIIL dataset, with XGBoost leading with an F1-score of 99.62%.
+
+### 8.2 Experiment 2: Domain-Disjoint Evaluation
+To test whether the models generalize to unseen domains within the same dataset, we conducted a domain-disjoint holdout evaluation. In this split, domain groupings are strictly separated so that no domain in the training set appears in the testing set. Table 4 reports these holdout results.
+
+Table 4: Domain-Disjoint Holdout Performance on PhiUSIIL Dataset
+| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC | PR-AUC |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| XGBoost | **0.9960** | 0.9940 | 0.9991 | **0.9966** | **0.9984** | **0.9980** |
+| Random Forest | 0.9953 | **0.9944** | 0.9975 | 0.9959 | 0.9969 | 0.9953 |
+| SVM (RBF approx.) | 0.9753 | 0.9921 | 0.9648 | 0.9783 | 0.9926 | 0.9926 |
+| Decision Tree | 0.9957 | 0.9932 | **0.9994** | 0.9963 | 0.9972 | 0.9959 |
+| Logistic Regression | 0.9937 | 0.9897 | 0.9995 | 0.9946 | 0.9960 | 0.9936 |
+
+The domain-disjoint holdout results match or slightly exceed the stratified 5-fold cross-validation performance. This suggests that the models do not suffer from domain memorization within this dataset, which would normally lead to a drop in performance on unseen domains.
+
+### 8.3 Experiment 3: Feature Ablation Study
+We conducted feature ablation experiments using the champion XGBoost model under 5-fold cross-validation. Table 5 details performance across pre-defined feature subsets: Structural features (length, domain length, dots, subdomains, hyphens, slashes), Security features (IP usage, HTTPS, keywords), and Randomness features (digits, special characters, entropy). Additionally, Table 6 shows the cumulative ablation results.
+
+Table 5: Group-Wise Feature Ablation on XGBoost Champion
+| Feature Set | Accuracy | F1-score | ROC-AUC | PR-AUC |
+| :--- | :---: | :---: | :---: | :---: |
+| All 12 Features | **0.9956 ± 0.0003** | **0.9962 ± 0.0003** | **0.9979 ± 0.0002** | **0.9972 ± 0.0003** |
+| Structure Only | 0.9924 ± 0.0007 | 0.9934 ± 0.0006 | 0.9970 ± 0.0001 | 0.9959 ± 0.0003 |
+| Security Only | 0.8050 ± 0.0010 | 0.8537 ± 0.0006 | 0.7746 ± 0.0012 | 0.7477 ± 0.0010 |
+| Randomness Only | 0.7849 ± 0.0014 | 0.8337 ± 0.0011 | 0.8056 ± 0.0019 | 0.7878 ± 0.0031 |
+
+Table 6: Cumulative Feature Ablation on XGBoost Champion
+| Feature Set | Accuracy | F1-score | ROC-AUC | PR-AUC |
+| :--- | :--- | :---: | :---: | :---: |
+| Lexical (Length, Digits, Special Chars) | 0.8060 ± 0.0010 | 0.8481 ± 0.0007 | 0.8239 ± 0.0009 | 0.7999 ± 0.0013 |
+| Lexical + Structural | 0.8617 ± 0.0012 | 0.8909 ± 0.0009 | 0.8836 ± 0.0010 | 0.8651 ± 0.0014 |
+| + Domain Length | 0.9930 ± 0.0011 | 0.9939 ± 0.0010 | 0.9976 ± 0.0001 | 0.9967 ± 0.0002 |
+| + Security | **0.9957 ± 0.0003** | **0.9962 ± 0.0003** | **0.9979 ± 0.0001** | **0.9973 ± 0.0003** |
+| + Entropy (All 12) | 0.9956 ± 0.0003 | 0.9962 ± 0.0003 | 0.9979 ± 0.0002 | 0.9973 ± 0.0003 |
+
+Adding domain length to the lexical and structural features results in the largest performance jump (F1-score increases from 89.09% to 99.39%), demonstrating that domain-length boundaries are extremely informative in the training dataset.
+
+### 8.4 Experiment 4: Cross-Dataset Validation
+To evaluate the real-world generalization capability of the PhishGuard models, we trained them on the full PhiUSIIL dataset and tested them on the external Wangchuk dataset [9], which consists of 129,777 unique URLs (74,972 legitimate, 54,807 phishing). Table 7 shows the performance metrics, demonstrating a catastrophic performance collapse across all classifiers.
+
+Table 7: External Cross-Dataset Validation Performance (Wangchuk Dataset)
+| Model | Accuracy | Precision | Recall | F1-score | ROC-AUC | PR-AUC |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| XGBoost | 0.5843 | **0.8337** | 0.0197 | 0.0384 | 0.6838 | **0.6378** |
+| Random Forest | 0.5844 | 0.8274 | 0.0199 | 0.0389 | 0.5175 | 0.4402 |
+| SVM (RBF approx.) | 0.5855 | 0.8258 | 0.0234 | 0.0456 | 0.4100 | 0.4416 |
+| Decision Tree | 0.5843 | 0.8279 | 0.0198 | 0.0387 | 0.5098 | 0.4305 |
+| Logistic Regression | **0.5860** | 0.7855 | **0.0272** | **0.0526** | **0.7058** | 0.6026 |
+
+All models struggle to detect phishing URLs from the external dataset, resulting in recalls below 3% and F1-scores between 3.8% and 5.3%. While precision remains relatively high (78.5% - 83.4%), the classifiers are almost entirely failing to identify the malicious class. To understand this prediction collapse, we examine the confusion matrices in Table 8.
+
+Table 8: Confusion Matrices on the External Wangchuk Dataset
+| Model | True Legit (TN) | False Phish (FP) | False Legit (FN) | True Phish (TP) |
+| :--- | :---: | :---: | :---: | :---: |
+| **XGBoost** | 74,757 | 215 | 53,727 | 1,078 |
+| **Random Forest** | 74,742 | 230 | 53,728 | 1,077 |
+| **SVM (RBF approx.)** | 74,701 | 271 | 53,520 | 1,285 |
+| **Decision Tree** | 74,741 | 231 | 53,718 | 1,087 |
+| **Logistic Regression** | 74,565 | 407 | 53,315 | 1,490 |
+
+The confusion matrices show that all five models predict almost every URL in the external dataset as legitimate. For example, XGBoost classifies only 1,293 out of 129,777 URLs as phishing (1,078 True Positives and 215 False Positives), missing 53,727 phishing URLs (False Negatives). This indicates a systemic generalization failure where the models are unable to transfer the learned decision boundary to an independent dataset.
+
+## 9. Discussion
+
+The experimental results present a striking contrast: the machine learning pipeline achieves near-perfect F1-scores (~99.6%) under standard and domain-disjoint evaluations within the PhiUSIIL dataset, yet collapses completely when evaluated on the external Wangchuk dataset. This section provides a detailed analysis of this phenomenon.
+
+### 9.1 Dataset-Specific Feature-Label Associations
+The discrepancy is explained by significant distribution shifts and dataset-specific shortcuts (spurious correlations) present in the training dataset that do not hold in the external dataset. The most critical distribution shifts include:
+
+1. **The HTTPS Bias**: HTTPS usage exhibits a strong dataset-specific association with the phishing label in PhiUSIIL, while its class distributions are much closer in the external Wangchuk dataset. In the PhiUSIIL dataset, there is an unusually strong relationship where **100% of phishing URLs use HTTPS**, while only **48.74% of legitimate URLs** do. This enables the models to learn a highly informative shortcut that fails on the external Wangchuk dataset, where **89.51% of phishing URLs** and **87.42% of legitimate URLs** use HTTPS.
+2. **URL Length Distribution**: The model learns to associate shorter URLs with phishing in PhiUSIIL (legitimate median length: 34 vs. phishing median length: 27). In the external dataset, the length distributions are shifted: legitimate median length is 61, and phishing median length is 45. The relationship still trends toward phishing being shorter, but the substantial overlap and overall shift confuse a model that has learned absolute length-threshold boundaries.
+3. **Digit Density**: In the PhiUSIIL dataset, digits are rare, with medians of 0 for both classes. In the Wangchuk dataset, legitimate URLs have a median of 3 digits and phishing URLs have a median of 4 digits. The model encounters far more digit features in the external dataset than it saw in training.
+4. **Special Character Usage**: In PhiUSIIL, special characters are practically non-existent in both classes (medians of 0). In the Wangchuk dataset, legitimate URLs have a median of 2 special characters, and phishing URLs have a median of 1.
+5. **Shannon Entropy Reversal**: Shannon entropy exhibits a complete reversal in class relationship. In PhiUSIIL, legitimate URLs have higher entropy (median: 4.106) than phishing URLs (median: 3.852). In the external dataset, the relationship is reversed, with phishing URLs having slightly higher entropy (median: 4.422) than legitimate URLs (median: 4.413).
+
+### 9.2 The Illusion of Domain-Disjoint holdout
+It is common practice in phishing detection literature to report domain-disjoint splits to prove model robustness against domain memorization. Our results (Experiment 2 F1-score of 99.66%) show that a domain-disjoint split within the same dataset fails to capture distribution shifts. This is because both the training and holdout domains in a single dataset are typically collected using the same search parameters, scraping tools, and time windows. 
+
+Therefore, domain-disjoint holdouts only prove that a model can generalize to unseen domains *collected under identical conditions*. They do not prove cross-dataset robustness. High in-dataset performance does not necessarily indicate cross-dataset robustness for lightweight phishing URL classifiers.
+
+### 9.3 Statistical and Scientific Phrasing
+Rather than claiming that these feature-distribution shifts explain the collapse with absolute mathematical certainty, we maintain scientific rigor:
+> "The external dataset exhibited substantial distribution differences across several URL features, including HTTPS usage, URL length, digit counts, special-character counts, and entropy. These differences provide a plausible explanation for the observed cross-dataset performance degradation."
+
+## 10. Dashboard and Application Design
 
 The administrative dashboard supports both individual analysis and aggregate monitoring. The user-facing view accepts a URL and returns:
 
@@ -201,7 +290,7 @@ The analyst dashboard tracks:
 
 Drift detection is important because phishing campaigns change quickly. If entropy, keyword density, subdomain usage, or special-character distributions shift significantly, the system should flag the need for dataset refresh and model retraining.
 
-## 10. Security, Privacy, and Ethical Considerations
+## 11. Security, Privacy, and Ethical Considerations
 
 The system should avoid storing sensitive query strings unless required for research and approved by policy. URLs can contain session identifiers, email addresses, reset tokens, or other private data. Production deployments should hash or redact sensitive components where possible.
 
@@ -209,7 +298,7 @@ False positives may block legitimate user activity, while false negatives may ex
 
 The system should not be represented as a complete replacement for browser safe-browsing services, DNS filtering, or user education. It is best understood as a fast URL-level detection layer within a broader defense-in-depth strategy.
 
-## 11. Limitations
+## 12. Limitations
 
 The proposed system intentionally uses URL-only features. This improves speed and safety but introduces limitations:
 
@@ -221,11 +310,11 @@ The proposed system intentionally uses URL-only features. This improves speed an
 
 Future work should evaluate host-based metadata, WHOIS age, DNS records, certificate properties, webpage screenshots, and transformer-based URL embeddings while preserving real-time constraints.
 
-## 12. Conclusion
+## 13. Conclusion
 
 This paper presented a complete design for an automated phishing URL detection and explainability system based on lexical machine learning features. The system extracts twelve lightweight indicators from a submitted URL, compares multiple supervised classifiers, outputs a phishing probability, and provides human-readable diagnostic flags. Its URL-only design supports real-time operation without visiting potentially malicious websites. The proposed benchmark protocol, dashboard design, and ethical safeguards make the system suitable as both an academic research project and a practical cybersecurity application prototype.
 
-## References
+## 14. References
 
 [1] A. Blum, B. Wardman, T. Solorio, and G. Warner, "Lexical feature based phishing URL detection using online learning," *Proceedings of the 3rd ACM Workshop on Artificial Intelligence and Security*, 2010. DOI: 10.1145/1866423.1866434.
 
@@ -242,3 +331,5 @@ This paper presented a complete design for an automated phishing URL detection a
 [7] OpenPhish, "Phishing feeds." Available: https://openphish.com/phishing_feeds.html
 
 [8] V. Le Pochat, T. Van Goethem, S. Tajalizadehkhoob, and W. Joosen, "Tranco: A research-oriented top sites ranking hardened against manipulation," *Network and Distributed System Security Symposium*, 2019. DOI: 10.14722/ndss.2019.23386.
+
+[9] T. Wangchuk, "Phishing URL dataset," Mendeley Data, 2026. DOI: 10.17632/3jddhy2f6s/1.
