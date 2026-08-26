@@ -1,0 +1,98 @@
+[
+  {
+    "feature": "url_length",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.51124,
+    "p_value": 0.0,
+    "effect_size": 0.51124,
+    "effect_label": "Very High"
+  },
+  {
+    "feature": "domain_length",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.18352000000000002,
+    "p_value": 0.0,
+    "effect_size": 0.18352000000000002,
+    "effect_label": "Moderate"
+  },
+  {
+    "feature": "num_dots",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.13066,
+    "p_value": 0.0,
+    "effect_size": 0.13066,
+    "effect_label": "Moderate"
+  },
+  {
+    "feature": "num_subdomains",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.15254,
+    "p_value": 0.0,
+    "effect_size": 0.15254,
+    "effect_label": "Moderate"
+  },
+  {
+    "feature": "num_digits",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.42678,
+    "p_value": 0.0,
+    "effect_size": 0.42678,
+    "effect_label": "High"
+  },
+  {
+    "feature": "special_chars",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.4049,
+    "p_value": 0.0,
+    "effect_size": 0.4049,
+    "effect_label": "High"
+  },
+  {
+    "feature": "num_hyphens",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.3123800000000001,
+    "p_value": 0.0,
+    "effect_size": 0.3123800000000001,
+    "effect_label": "High"
+  },
+  {
+    "feature": "num_slashes",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.6434400000000001,
+    "p_value": 0.0,
+    "effect_size": 0.6434400000000001,
+    "effect_label": "Very High"
+  },
+  {
+    "feature": "has_ip",
+    "test": "Chi-Square",
+    "statistic": 14.27834826419377,
+    "p_value": 0.00015766809128021878,
+    "effect_size": 0.011949204268148474,
+    "effect_label": "Negligible"
+  },
+  {
+    "feature": "is_https",
+    "test": "Chi-Square",
+    "statistic": 3205.6985262864473,
+    "p_value": 0.0,
+    "effect_size": 0.17904464600446582,
+    "effect_label": "Moderate"
+  },
+  {
+    "feature": "suspicious_keywords",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.019340000000000024,
+    "p_value": 1.4884935747548773e-08,
+    "effect_size": 0.019340000000000024,
+    "effect_label": "Negligible"
+  },
+  {
+    "feature": "url_entropy",
+    "test": "Kolmogorov-Smirnov",
+    "statistic": 0.4797,
+    "p_value": 0.0,
+    "effect_size": 0.4797,
+    "effect_label": "High"
+  }
+]
