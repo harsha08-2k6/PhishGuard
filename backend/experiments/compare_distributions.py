@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import argparse
-import os
 import sys
-import numpy as np
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
 # pyrefly: ignore [missing-import]
 from joblib import Parallel, delayed
 
@@ -15,6 +15,7 @@ from joblib import Parallel, delayed
 backend_dir = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(backend_dir))
 from extract_features import FEATURE_ORDER, extract_features
+
 
 def process_dataset(path: Path, name: str) -> pd.DataFrame:
     print(f"Loading {name} from {path}...")
@@ -133,7 +134,7 @@ def main() -> None:
     
     report_lines = []
     report_lines.append("# Feature Distribution Analysis Report")
-    report_lines.append(f"\nAnalyzed datasets:")
+    report_lines.append("\nAnalyzed datasets:")
     report_lines.append(f"- **PhiUSIIL**: {len(phi_df):,} URLs")
     report_lines.append(f"- **Wangchuk**: {len(wang_df):,} URLs")
     report_lines.append("\n## Table 1: Compact Comparison Table")

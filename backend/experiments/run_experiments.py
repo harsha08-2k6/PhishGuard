@@ -19,10 +19,13 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.kernel_approximation import Nystroem
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
     average_precision_score,
+    confusion_matrix,
     f1_score,
     precision_score,
     recall_score,
@@ -31,14 +34,11 @@ from sklearn.metrics import (
 from sklearn.model_selection import GroupShuffleSplit, StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.kernel_approximation import Nystroem
 from sklearn.svm import LinearSVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from extract_features import FEATURE_ORDER, extract_features  # noqa: E402
-
+from extract_features import FEATURE_ORDER, extract_features
 
 FEATURE_NAMES = FEATURE_ORDER
 
@@ -81,6 +81,7 @@ CUMULATIVE_ABLATION_GROUPS = {
 
 
 def metric_row(y_true: np.ndarray, y_pred: np.ndarray, probabilities: np.ndarray) -> dict[str, float]:
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[0, 1]).ravel()
     return {
         "accuracy": accuracy_score(y_true, y_pred),
         "precision": precision_score(y_true, y_pred, zero_division=0),
@@ -88,6 +89,10 @@ def metric_row(y_true: np.ndarray, y_pred: np.ndarray, probabilities: np.ndarray
         "f1": f1_score(y_true, y_pred, zero_division=0),
         "roc_auc": roc_auc_score(y_true, probabilities),
         "pr_auc": average_precision_score(y_true, probabilities),
+        "tn": float(tn),
+        "fp": float(fp),
+        "fn": float(fn),
+        "tp": float(tp),
     }
 
 
@@ -349,9 +354,18 @@ def main() -> None:
         args.output_dir / "cumulative_ablation_results.json", orient="records", indent=2
     )
     if args.external_dataset:
-        pd.DataFrame(evaluate_external(models, data, args.external_dataset, args.seed)).to_csv(
+        ext_results = evaluate_external(models, data, args.external_dataset, args.seed)
+        pd.DataFrame(ext_results).to_csv(
             args.output_dir / "external_results.csv", index=False
         )
+        print("\n--- External Dataset Confusion Matrices ---")
+        for row in ext_results:
+            print(f"Model: {row['model']}")
+            print("  Confusion Matrix:")
+            print("    Predicted Legit   Predicted Phish")
+            print(f"Actual Legit     {int(row['tn']):<17} {int(row['fp']):<15}")
+            print(f"Actual Phish     {int(row['fn']):<17} {int(row['tp']):<15}")
+            print()
     print(f"Completed {len(data):,} rows; champion: {champion_name}; artifacts: {len(artifact_paths)}")
 
 
