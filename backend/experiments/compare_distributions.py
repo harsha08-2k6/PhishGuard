@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import sys
 import numpy as np
@@ -88,8 +89,30 @@ def format_compact_cell(stats_dict: dict[str, float], is_binary: bool) -> str:
         )
 
 def main() -> None:
-    phi_path = Path("C:/Users/91965/Downloads/PhiUSIIL_Phishing_URL_Dataset.csv")
-    wang_path = backend_dir / "experiments" / "external_wangchuk.csv"
+    parser = argparse.ArgumentParser(description="Compare feature distributions between PhiUSIIL and Wangchuk datasets.")
+    parser.add_argument(
+        "--dataset",
+        type=Path,
+        required=True,
+        help="Path to the PhiUSIIL dataset CSV."
+    )
+    parser.add_argument(
+        "--external-dataset",
+        type=Path,
+        default=backend_dir / "experiments" / "external_wangchuk.csv",
+        help="Path to the external Wangchuk dataset CSV."
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=backend_dir / "experiments" / "results" / "feature_comparison_report.md",
+        help="Path where the comparison markdown report will be saved."
+    )
+    args = parser.parse_args()
+
+    phi_path = args.dataset
+    wang_path = args.external_dataset
+    report_path = args.output
     
     if not phi_path.exists():
         print(f"Error: PhiUSIIL dataset not found at {phi_path}")
@@ -106,9 +129,7 @@ def main() -> None:
     wang_stats = calculate_stats(wang_df)
     
     # Let's write out a report.
-    output_dir = backend_dir / "experiments" / "results"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    report_path = output_dir / "feature_comparison_report.md"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     
     report_lines = []
     report_lines.append("# Feature Distribution Analysis Report")
