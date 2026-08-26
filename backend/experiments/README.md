@@ -83,7 +83,7 @@ The count of removed rows is printed and recorded in `run_metadata.json` under `
 
 **Dataset:** Tandin Wangchuk, *Phishing URL dataset*, Mendeley Data, 2026.  
 DOI: [10.17632/3jddhy2f6s/1](https://data.mendeley.com/datasets/3jddhy2f6s/1)  
-149,726 URLs — 54,807 phishing (PhishTank) + 94,919 legitimate (Common Crawl). CC BY 4.0.
+Raw dataset: 149,726 URLs — 54,807 phishing (PhishTank) + 94,919 legitimate (Common Crawl). Preprocessed/deduplicated evaluation set: 129,777 unique URLs — 54,805 phishing + 74,972 legitimate.
 
 **Step 1 — Prepare the external CSV** (run once after downloading the Mendeley archive):
 
