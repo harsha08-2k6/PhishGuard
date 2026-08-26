@@ -1,0 +1,29 @@
+{
+  "rule_baseline": {
+    "phiusiil_internal": {
+      "precision": 0.4161651584707157,
+      "recall": 0.3502484241750093,
+      "f1": 0.3803721495846437
+    },
+    "wangchuk_external": {
+      "precision": 0.39776203656493553,
+      "recall": 0.7971352978742815,
+      "f1": 0.5307069492276949
+    }
+  },
+  "domain_disjoint_split_profile": {
+    "training": {
+      "urls": 189074,
+      "unique_domains": 176068,
+      "legitimate": 81147,
+      "phishing": 107927
+    },
+    "testing": {
+      "urls": 46721,
+      "unique_domains": 44018,
+      "legitimate": 19798,
+      "phishing": 26923
+    },
+    "domain_overlap": 0
+  }
+}
