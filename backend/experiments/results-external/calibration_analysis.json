@@ -1,0 +1,10 @@
+{
+  "phiusiil_internal": {
+    "brier_score": 0.004042298998683691,
+    "ece_10_bins": 0.0011042781582832658
+  },
+  "wangchuk_external": {
+    "brier_score": 0.41519075632095337,
+    "ece_10_bins": 0.4153879581862005
+  }
+}

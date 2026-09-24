@@ -1,0 +1,66 @@
+{
+  "mean_absolute_shap": {
+    "url_length": 0.6547366380691528,
+    "domain_length": 0.08547314256429672,
+    "num_dots": 0.25161826610565186,
+    "num_subdomains": 0.12479923665523529,
+    "num_digits": 0.6160910129547119,
+    "special_chars": 0.21411293745040894,
+    "num_hyphens": 0.01771317422389984,
+    "num_slashes": 3.6230154037475586,
+    "has_ip": 0.0,
+    "is_https": 4.008704662322998,
+    "suspicious_keywords": 0.03641654923558235,
+    "url_entropy": 0.13921067118644714
+  },
+  "sorted_mean_absolute_shap": [
+    [
+      "is_https",
+      4.008704662322998
+    ],
+    [
+      "num_slashes",
+      3.6230154037475586
+    ],
+    [
+      "url_length",
+      0.6547366380691528
+    ],
+    [
+      "num_digits",
+      0.6160910129547119
+    ],
+    [
+      "num_dots",
+      0.25161826610565186
+    ],
+    [
+      "special_chars",
+      0.21411293745040894
+    ],
+    [
+      "url_entropy",
+      0.13921067118644714
+    ],
+    [
+      "num_subdomains",
+      0.12479923665523529
+    ],
+    [
+      "domain_length",
+      0.08547314256429672
+    ],
+    [
+      "suspicious_keywords",
+      0.03641654923558235
+    ],
+    [
+      "num_hyphens",
+      0.01771317422389984
+    ],
+    [
+      "has_ip",
+      0.0
+    ]
+  ]
+}

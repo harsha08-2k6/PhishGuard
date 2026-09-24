@@ -1,0 +1,25 @@
+{
+  "feature_extraction_latency_ms": 0.013349030003882944,
+  "sample_size": 10000,
+  "training_time_seconds": {
+    "Logistic Regression": 0.029196200077421963,
+    "Decision Tree": 0.011303500039502978,
+    "Random Forest": 0.393847499974072,
+    "SVM (RBF approximation)": 0.0530877000419423,
+    "XGBoost": 0.4477401999756694
+  },
+  "inference_latency_ms": {
+    "Logistic Regression": 9.76799987256527e-05,
+    "Decision Tree": 0.00013478599954396488,
+    "Random Forest": 0.004144297998864204,
+    "SVM (RBF approximation)": 0.001593895999249071,
+    "XGBoost": 0.0007243239996023476
+  },
+  "model_size_kb": {
+    "Logistic Regression": 2.0947265625,
+    "Decision Tree": 3.6181640625,
+    "Random Forest": 3135.4931640625,
+    "SVM (RBF approximation)": 27.2626953125,
+    "XGBoost": 235.162109375
+  }
+}

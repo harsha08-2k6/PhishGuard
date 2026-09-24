@@ -1,0 +1,93 @@
+[
+  {
+    "configuration": "Full Deployed (12 features)",
+    "feature_count": 12,
+    "features": [
+      "url_length",
+      "domain_length",
+      "num_dots",
+      "num_subdomains",
+      "num_digits",
+      "special_chars",
+      "num_hyphens",
+      "num_slashes",
+      "has_ip",
+      "is_https",
+      "suspicious_keywords",
+      "url_entropy"
+    ],
+    "cv_f1": 0.9948791255289302,
+    "external_f1": 0.038085728550032096,
+    "inference_latency_ms": 0.00035993845852426713
+  },
+  {
+    "configuration": "Top-7 Features (MI-based)",
+    "feature_count": 7,
+    "features": [
+      "num_slashes",
+      "is_https",
+      "num_digits",
+      "url_length",
+      "url_entropy",
+      "special_chars",
+      "domain_length"
+    ],
+    "cv_f1": 0.992859821135893,
+    "external_f1": 0.04740142416834945,
+    "inference_latency_ms": 0.0003080915723659788
+  },
+  {
+    "configuration": "Top-5 Features (MI-based)",
+    "feature_count": 5,
+    "features": [
+      "num_slashes",
+      "is_https",
+      "num_digits",
+      "url_length",
+      "url_entropy"
+    ],
+    "cv_f1": 0.992743973423211,
+    "external_f1": 0.0477387824485604,
+    "inference_latency_ms": 0.00031875935880042085
+  },
+  {
+    "configuration": "Remove HTTPS Shortcut (11 features)",
+    "feature_count": 11,
+    "features": [
+      "url_length",
+      "domain_length",
+      "num_dots",
+      "num_subdomains",
+      "num_digits",
+      "special_chars",
+      "num_hyphens",
+      "num_slashes",
+      "has_ip",
+      "suspicious_keywords",
+      "url_entropy"
+    ],
+    "cv_f1": 0.9924156146003664,
+    "external_f1": 0.0377345044451175,
+    "inference_latency_ms": 0.0003372759939053254
+  },
+  {
+    "configuration": "Remove IP Address Indicator (11 features)",
+    "feature_count": 11,
+    "features": [
+      "url_length",
+      "domain_length",
+      "num_dots",
+      "num_subdomains",
+      "num_digits",
+      "special_chars",
+      "num_hyphens",
+      "num_slashes",
+      "is_https",
+      "suspicious_keywords",
+      "url_entropy"
+    ],
+    "cv_f1": 0.9949194466246268,
+    "external_f1": 0.03808437043112363,
+    "inference_latency_ms": 0.0003452581479882284
+  }
+]
